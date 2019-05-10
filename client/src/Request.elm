@@ -17,7 +17,7 @@ query :
     -> Cmd msg
 query msgConstructor querySelection =
     querySelection
-        |> Graphql.Http.queryRequest "http://localhost:4000/"
+        |> Graphql.Http.queryRequest "http://localhost:8000/graphql"
         |> Graphql.Http.send
             (\result ->
                 result

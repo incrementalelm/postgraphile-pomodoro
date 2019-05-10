@@ -13,20 +13,26 @@ import Graphql.Operation exposing (RootQuery)
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
+import Time
 import Url exposing (Url)
 
 
-selection : SelectionSet (Maybe Api.ScalarCodecs.Datetime) RootQuery
+selection : SelectionSet (Maybe Time.Posix) RootQuery
 selection =
     Query.activeTimer Api.Object.Timer.createdAt
 
 
+makeRequest : Cmd Msg
+makeRequest =
+    Request.query GotTimerResponse selection
+
+
 type Msg
-    = NoOp
+    = GotTimerResponse (Response (Maybe Time.Posix))
 
 
 type alias Model =
-    Int
+    Response (Maybe Time.Posix)
 
 
 type alias Flags =
@@ -35,12 +41,14 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( 0, Cmd.none )
+    ( RemoteData.Loading, makeRequest )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        GotTimerResponse timerResponse ->
+            ( timerResponse, Cmd.none )
 
 
 main : Program Flags Model Msg
@@ -53,11 +61,35 @@ main =
         }
 
 
+timerView : Maybe Time.Posix -> Element msg
+timerView maybeStartTime =
+    case maybeStartTime of
+        Just posixTime ->
+            Element.column []
+                [ Element.text "Timer is running"
+                ]
+
+        Nothing ->
+            Element.text "No active timer"
+
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "Elm Postgraphile Pomodoro"
     , body =
-        Element.none
+        (case model of
+            RemoteData.Loading ->
+                Element.text "Loading..."
+
+            RemoteData.Success response ->
+                timerView response
+
+            RemoteData.NotAsked ->
+                Element.text "..."
+
+            RemoteData.Failure error ->
+                Element.paragraph [] [ Element.text (Debug.toString error) ]
+        )
             |> Element.layout []
             |> List.singleton
     }

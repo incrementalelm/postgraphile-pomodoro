@@ -9,7 +9,6 @@ import Api.InputObject
 import Api.Interface
 import Api.Object
 import Api.Scalar
-import Api.ScalarCodecs
 import Api.Union
 import Graphql.Internal.Builder.Argument as Argument exposing (Argument)
 import Graphql.Internal.Builder.Object as Object
@@ -18,6 +17,7 @@ import Graphql.Operation exposing (RootMutation, RootQuery, RootSubscription)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
+import Scalar
 
 
 id : SelectionSet Int Api.Object.Timer
@@ -25,9 +25,9 @@ id =
     Object.selectionForField "Int" "id" [] Decode.int
 
 
-createdAt : SelectionSet Api.ScalarCodecs.Datetime Api.Object.Timer
+createdAt : SelectionSet Scalar.Datetime Api.Object.Timer
 createdAt =
-    Object.selectionForField "ScalarCodecs.Datetime" "createdAt" [] (Api.ScalarCodecs.codecs |> Api.Scalar.unwrapCodecs |> .codecDatetime |> .decoder)
+    Object.selectionForField "Scalar.Datetime" "createdAt" [] (Scalar.codecs |> Api.Scalar.unwrapCodecs |> .codecDatetime |> .decoder)
 
 
 userId : SelectionSet Int Api.Object.Timer
