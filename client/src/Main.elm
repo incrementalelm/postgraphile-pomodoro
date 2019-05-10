@@ -17,9 +17,14 @@ import Time
 import Url exposing (Url)
 
 
-selection : SelectionSet (Maybe Time.Posix) RootQuery
+type alias Timer =
+    { createdAt : Time.Posix
+    }
+
+
+selection : SelectionSet (Maybe Timer) RootQuery
 selection =
-    Query.activeTimer Api.Object.Timer.createdAt
+    Query.activeTimer (SelectionSet.map Timer Api.Object.Timer.createdAt)
 
 
 makeRequest : Cmd Msg
@@ -28,11 +33,11 @@ makeRequest =
 
 
 type Msg
-    = GotTimerResponse (Response (Maybe Time.Posix))
+    = GotTimerResponse (Response (Maybe Timer))
 
 
 type alias Model =
-    Response (Maybe Time.Posix)
+    Response (Maybe Timer)
 
 
 type alias Flags =
@@ -61,13 +66,12 @@ main =
         }
 
 
-timerView : Maybe Time.Posix -> Element msg
+timerView : Maybe Timer -> Element msg
 timerView maybeStartTime =
     case maybeStartTime of
         Just posixTime ->
             Element.column []
-                [ Element.text "Timer is running"
-                ]
+                [ Element.text "Timer is running" ]
 
         Nothing ->
             Element.text "No active timer"
