@@ -17,13 +17,8 @@ import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
 import Time
+import Timer exposing (Timer)
 import Url exposing (Url)
-
-
-type alias Timer =
-    { createdAt : Time.Posix
-    , kind : Api.Enum.TimerKind.TimerKind
-    }
 
 
 selection : SelectionSet (Maybe Timer) RootQuery
