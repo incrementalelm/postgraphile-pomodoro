@@ -1,4 +1,4 @@
-module Timer exposing (Timer)
+module Timer exposing (Timer, selection)
 
 import Api.Enum.TimerKind
 import Api.Object
@@ -12,3 +12,10 @@ type alias Timer =
     { createdAt : Time.Posix
     , kind : Api.Enum.TimerKind.TimerKind
     }
+
+
+selection : SelectionSet Timer Api.Object.Timer
+selection =
+    SelectionSet.map2 Timer
+        Api.Object.Timer.createdAt
+        Api.Object.Timer.kind

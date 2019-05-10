@@ -24,14 +24,7 @@ import Url exposing (Url)
 selection : SelectionSet (Maybe Timer) RootQuery
 selection =
     Query.activeTimer
-        timerSelection
-
-
-timerSelection : SelectionSet Timer Api.Object.Timer
-timerSelection =
-    SelectionSet.map2 Timer
-        Api.Object.Timer.createdAt
-        Api.Object.Timer.kind
+        Timer.selection
 
 
 makeRequest : Cmd Msg
