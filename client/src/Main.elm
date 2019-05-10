@@ -11,6 +11,7 @@ import Element exposing (Element)
 import Element.Border
 import Element.Events
 import Element.Input
+import Element.Keyed
 import Graphql.Operation exposing (RootQuery)
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
@@ -83,27 +84,47 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \model -> Time.every 1000 GotCurrentTime
+        , subscriptions = \model -> Time.every 10 GotCurrentTime
         }
 
 
-timerView : Maybe Timer -> Element msg
-timerView maybeTimer =
+timerView : Time.Posix -> Maybe Timer -> Element msg
+timerView now maybeTimer =
     case maybeTimer of
         Just timer ->
             Element.column []
                 [ Element.text (Api.Enum.TimerKind.toString timer.kind)
-                , Element.text "Timer is running"
-                , Element.text (timeRemaining timer |> String.fromInt)
+                , ( "timer", Element.text "Timer is running" ) |> Element.Keyed.el []
+                , Element.text (secondsRemaining now timer |> secondsRemainingAsCountdownString)
                 ]
 
         Nothing ->
             Element.text "No active timer"
 
 
-timeRemaining : Timer -> Int
-timeRemaining timer =
-    0
+secondsRemaining : Time.Posix -> Timer -> Int
+secondsRemaining now timer =
+    let
+        timerMillis =
+            25 * 60 * 1000
+    in
+    ((Time.posixToMillis timer.createdAt + timerMillis)
+        - Time.posixToMillis now
+    )
+        // 1000
+
+
+secondsRemainingAsCountdownString : Int -> String
+secondsRemainingAsCountdownString seconds =
+    String.concat
+        [ seconds
+            // 60
+            |> String.fromInt
+        , ":"
+        , seconds
+            |> modBy 60
+            |> String.fromInt
+        ]
 
 
 view : Model -> Browser.Document Msg
@@ -115,7 +136,7 @@ view model =
                 Element.text "Loading..."
 
             RemoteData.Success response ->
-                timerView response
+                timerView model.now response
 
             RemoteData.NotAsked ->
                 Element.text "..."
