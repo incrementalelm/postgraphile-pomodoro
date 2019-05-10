@@ -45,10 +45,11 @@ makeRequest =
 
 type Msg
     = GotTimerResponse (Response (Maybe Timer))
+    | GotCurrentTime Time.Posix
 
 
 type alias Model =
-    Response (Maybe Timer)
+    { activeTimerResponse : Response (Maybe Timer) }
 
 
 type alias Flags =
@@ -57,14 +58,17 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( RemoteData.Loading, makeRequest )
+    ( { activeTimerResponse = RemoteData.Loading }, makeRequest )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotTimerResponse timerResponse ->
-            ( timerResponse, Cmd.none )
+            ( { model | activeTimerResponse = timerResponse }, Cmd.none )
+
+        GotCurrentTime _ ->
+            ( model, Cmd.none )
 
 
 main : Program Flags Model Msg
@@ -73,7 +77,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \model -> Sub.none
+        , subscriptions = \model -> Time.every 1000 GotCurrentTime
         }
 
 
@@ -84,17 +88,23 @@ timerView maybeTimer =
             Element.column []
                 [ Element.text (Api.Enum.TimerKind.toString timer.kind)
                 , Element.text "Timer is running"
+                , Element.text (timeRemaining timer |> String.fromInt)
                 ]
 
         Nothing ->
             Element.text "No active timer"
 
 
+timeRemaining : Timer -> Int
+timeRemaining timer =
+    0
+
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "Elm Postgraphile Pomodoro"
     , body =
-        (case model of
+        (case model.activeTimerResponse of
             RemoteData.Loading ->
                 Element.text "Loading..."
 
