@@ -116,15 +116,15 @@ secondsRemaining now timer =
 
 secondsRemainingAsCountdownString : Int -> String
 secondsRemainingAsCountdownString seconds =
-    String.concat
-        [ seconds
-            // 60
-            |> String.fromInt
-        , ":"
-        , seconds
-            |> modBy 60
-            |> String.fromInt
-        ]
+    [ seconds
+        // 60
+        |> String.fromInt
+    , seconds
+        |> modBy 60
+        |> String.fromInt
+        |> String.padLeft 2 '0'
+    ]
+        |> String.join ":"
 
 
 view : Model -> Browser.Document Msg
