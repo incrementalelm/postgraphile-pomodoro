@@ -1,5 +1,7 @@
 module Main exposing (main)
 
+import Api.Enum.TimerKind
+import Api.Object
 import Api.Object.Timer
 import Api.Query as Query
 import Api.ScalarCodecs
@@ -19,12 +21,21 @@ import Url exposing (Url)
 
 type alias Timer =
     { createdAt : Time.Posix
+    , kind : Api.Enum.TimerKind.TimerKind
     }
 
 
 selection : SelectionSet (Maybe Timer) RootQuery
 selection =
-    Query.activeTimer (SelectionSet.map Timer Api.Object.Timer.createdAt)
+    Query.activeTimer
+        timerSelection
+
+
+timerSelection : SelectionSet Timer Api.Object.Timer
+timerSelection =
+    SelectionSet.map2 Timer
+        Api.Object.Timer.createdAt
+        Api.Object.Timer.kind
 
 
 makeRequest : Cmd Msg
@@ -67,11 +78,13 @@ main =
 
 
 timerView : Maybe Timer -> Element msg
-timerView maybeStartTime =
-    case maybeStartTime of
-        Just posixTime ->
+timerView maybeTimer =
+    case maybeTimer of
+        Just timer ->
             Element.column []
-                [ Element.text "Timer is running" ]
+                [ Element.text (Api.Enum.TimerKind.toString timer.kind)
+                , Element.text "Timer is running"
+                ]
 
         Nothing ->
             Element.text "No active timer"
