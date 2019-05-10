@@ -1,9 +1,10 @@
-module Timer exposing (Timer, selection)
+module Timer exposing (Timer, selection, view)
 
 import Api.Enum.TimerKind
 import Api.Object
 import Api.Object.Timer
 import Api.Query as Query
+import Element exposing (Element)
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Time
 
@@ -19,3 +20,42 @@ selection =
     SelectionSet.map2 Timer
         Api.Object.Timer.createdAt
         Api.Object.Timer.kind
+
+
+view : Time.Posix -> Maybe Timer -> Element msg
+view now maybeTimer =
+    case maybeTimer of
+        Just timer ->
+            Element.column []
+                [ Element.text (Api.Enum.TimerKind.toString timer.kind)
+                , Element.text "Timer is running"
+                , Element.text (secondsRemaining now timer |> secondsRemainingAsCountdownString)
+                ]
+
+        Nothing ->
+            Element.text "No active timer"
+
+
+secondsRemaining : Time.Posix -> Timer -> Int
+secondsRemaining now timer =
+    let
+        timerMillis =
+            25 * 60 * 1000
+    in
+    ((Time.posixToMillis timer.createdAt + timerMillis)
+        - Time.posixToMillis now
+    )
+        // 1000
+
+
+secondsRemainingAsCountdownString : Int -> String
+secondsRemainingAsCountdownString seconds =
+    [ seconds
+        // 60
+        |> String.fromInt
+    , seconds
+        |> modBy 60
+        |> String.fromInt
+        |> String.padLeft 2 '0'
+    ]
+        |> String.join ":"

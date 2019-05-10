@@ -76,45 +76,6 @@ main =
         }
 
 
-timerView : Time.Posix -> Maybe Timer -> Element msg
-timerView now maybeTimer =
-    case maybeTimer of
-        Just timer ->
-            Element.column []
-                [ Element.text (Api.Enum.TimerKind.toString timer.kind)
-                , ( "timer", Element.text "Timer is running" ) |> Element.Keyed.el []
-                , Element.text (secondsRemaining now timer |> secondsRemainingAsCountdownString)
-                ]
-
-        Nothing ->
-            Element.text "No active timer"
-
-
-secondsRemaining : Time.Posix -> Timer -> Int
-secondsRemaining now timer =
-    let
-        timerMillis =
-            25 * 60 * 1000
-    in
-    ((Time.posixToMillis timer.createdAt + timerMillis)
-        - Time.posixToMillis now
-    )
-        // 1000
-
-
-secondsRemainingAsCountdownString : Int -> String
-secondsRemainingAsCountdownString seconds =
-    [ seconds
-        // 60
-        |> String.fromInt
-    , seconds
-        |> modBy 60
-        |> String.fromInt
-        |> String.padLeft 2 '0'
-    ]
-        |> String.join ":"
-
-
 view : Model -> Browser.Document Msg
 view model =
     { title = "Elm Postgraphile Pomodoro"
@@ -124,7 +85,7 @@ view model =
                 Element.text "Loading..."
 
             RemoteData.Success response ->
-                timerView model.now response
+                Timer.view model.now response
 
             RemoteData.NotAsked ->
                 Element.text "..."
