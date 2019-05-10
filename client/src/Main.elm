@@ -49,7 +49,9 @@ type Msg
 
 
 type alias Model =
-    { activeTimerResponse : Response (Maybe Timer) }
+    { activeTimerResponse : Response (Maybe Timer)
+    , now : Time.Posix
+    }
 
 
 type alias Flags =
@@ -58,7 +60,11 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( { activeTimerResponse = RemoteData.Loading }, makeRequest )
+    ( { activeTimerResponse = RemoteData.Loading
+      , now = Time.millisToPosix 0
+      }
+    , makeRequest
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,8 +73,8 @@ update msg model =
         GotTimerResponse timerResponse ->
             ( { model | activeTimerResponse = timerResponse }, Cmd.none )
 
-        GotCurrentTime _ ->
-            ( model, Cmd.none )
+        GotCurrentTime now ->
+            ( { model | now = now }, Cmd.none )
 
 
 main : Program Flags Model Msg
