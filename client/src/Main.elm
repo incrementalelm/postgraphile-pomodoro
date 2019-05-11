@@ -1,12 +1,14 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Api.Enum.TimerKind
 import Api.Mutation
 import Api.Object
+import Api.Object.ListenPayload
 import Api.Object.StartTimerPayload
 import Api.Object.Timer
 import Api.Query as Query
 import Api.ScalarCodecs
+import Api.Subscription
 import Browser
 import Browser.Navigation
 import Element exposing (Element)
@@ -14,14 +16,27 @@ import Element.Border
 import Element.Events
 import Element.Input
 import Element.Keyed
+import Graphql.Document
 import Graphql.Operation exposing (RootMutation, RootQuery)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import Json.Decode
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
 import Time
 import Timer exposing (Timer)
 import Url exposing (Url)
+
+
+port startSubscription : String -> Cmd msg
+
+
+port subscriptionPayloadReceived : (Json.Decode.Value -> msg) -> Sub msg
+
+
+subscriptionString : SelectionSet (Maybe (Maybe Timer)) Graphql.Operation.RootSubscription
+subscriptionString =
+    Api.Subscription.listen { topic = "timer" } (Api.Object.ListenPayload.query selection)
 
 
 selection : SelectionSet (Maybe Timer) RootQuery
@@ -51,6 +66,7 @@ makeRequest =
 
 type Msg
     = GotTimerResponse (Response (Maybe Timer))
+    | GotTimerSubscriptionResponse (Result Json.Decode.Error (Maybe Timer))
     | GotCurrentTime Time.Posix
     | ClickedStartTimer
 
@@ -70,7 +86,10 @@ init _ =
     ( { activeTimerResponse = RemoteData.Loading
       , now = Time.millisToPosix 0
       }
-    , makeRequest
+    , Cmd.batch
+        [ makeRequest
+        , startSubscription (subscriptionString |> Graphql.Document.serializeSubscription)
+        ]
     )
 
 
@@ -86,6 +105,14 @@ update msg model =
         ClickedStartTimer ->
             ( model, startTimer )
 
+        GotTimerSubscriptionResponse timerResult ->
+            case timerResult of
+                Ok timer ->
+                    ( { model | activeTimerResponse = RemoteData.succeed timer }, Cmd.none )
+
+                Err error ->
+                    Debug.todo (Json.Decode.errorToString error)
+
 
 main : Program Flags Model Msg
 main =
@@ -93,7 +120,18 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \model -> Time.every 10 GotCurrentTime
+        , subscriptions =
+            \model ->
+                Sub.batch
+                    [ Time.every 10 GotCurrentTime
+                    , subscriptionPayloadReceived
+                        (\payload ->
+                            payload
+                                |> Json.Decode.decodeValue (Graphql.Document.decoder subscriptionString)
+                                |> Result.map (Maybe.withDefault Nothing)
+                                |> GotTimerSubscriptionResponse
+                        )
+                    ]
         }
 
 
