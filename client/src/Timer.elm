@@ -29,27 +29,33 @@ view now maybeTimer =
             Element.column []
                 [ Element.text (Api.Enum.TimerKind.toString timer.kind)
                 , Element.text "Timer is running"
-                , Element.text (secondsRemaining now timer |> secondsRemainingAsCountdownString)
+                , Element.text (secondsRemaining now timer |> secondsRemainingView)
                 ]
 
         Nothing ->
             Element.text "No active timer"
 
 
-secondsRemaining : Time.Posix -> Timer -> Int
+secondsRemaining : Time.Posix -> Timer -> RemainingSeconds
 secondsRemaining now timer =
     let
         timerMillis =
             25 * 60 * 1000
     in
-    ((Time.posixToMillis timer.createdAt + timerMillis)
+    (((Time.posixToMillis timer.createdAt + timerMillis)
         - Time.posixToMillis now
-    )
+     )
         // 1000
+    )
+        |> RemainingSeconds
 
 
-secondsRemainingAsCountdownString : Int -> String
-secondsRemainingAsCountdownString seconds =
+type RemainingSeconds
+    = RemainingSeconds Int
+
+
+secondsRemainingView : RemainingSeconds -> String
+secondsRemainingView (RemainingSeconds seconds) =
     [ seconds
         // 60
         |> String.fromInt
