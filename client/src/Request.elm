@@ -13,7 +13,7 @@ type alias Response data =
 
 endpoint : String
 endpoint =
-    "http://localhost:8000/graphql"
+    "http://localhost:5000/graphql"
 
 
 query :
