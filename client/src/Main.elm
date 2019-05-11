@@ -110,7 +110,7 @@ view model =
                     [ Element.centerX
                     ]
                     [ Timer.view model.now response
-                    , startTimerButton
+                    , startTimerButton (response |> Maybe.map .kind)
                     ]
 
             RemoteData.NotAsked ->
@@ -127,12 +127,28 @@ view model =
     }
 
 
-startTimerButton : Element Msg
-startTimerButton =
+startTimerButton : Maybe Api.Enum.TimerKind.TimerKind -> Element Msg
+startTimerButton maybeKind =
     Element.el
         [ Element.Events.onClick ClickedStartTimer
         , Element.pointer
         , Element.Border.width 2
         , Element.padding 8
         ]
-        (Element.text "Start Timer")
+        ((case maybeKind of
+            Just kind ->
+                case kind of
+                    Api.Enum.TimerKind.Work ->
+                        "Start New Timer"
+
+                    Api.Enum.TimerKind.ShortBreak ->
+                        "Start Timer"
+
+                    Api.Enum.TimerKind.LongBreak ->
+                        "Start Timer"
+
+            Nothing ->
+                "Start Timer"
+         )
+            |> Element.text
+        )
