@@ -1,7 +1,9 @@
 module Main exposing (main)
 
 import Api.Enum.TimerKind
+import Api.Mutation
 import Api.Object
+import Api.Object.StartTimerPayload
 import Api.Object.Timer
 import Api.Query as Query
 import Api.ScalarCodecs
@@ -12,7 +14,8 @@ import Element.Border
 import Element.Events
 import Element.Input
 import Element.Keyed
-import Graphql.Operation exposing (RootQuery)
+import Graphql.Operation exposing (RootMutation, RootQuery)
+import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
@@ -25,6 +28,15 @@ selection : SelectionSet (Maybe Timer) RootQuery
 selection =
     Query.activeTimer
         Timer.selection
+
+
+startTimer : SelectionSet (Maybe Timer) RootMutation
+startTimer =
+    Api.Mutation.startTimer
+        { input = { kind = Api.Enum.TimerKind.Work, clientMutationId = Absent }
+        }
+        (Api.Object.StartTimerPayload.timer Timer.selection)
+        |> SelectionSet.map (Maybe.withDefault Nothing)
 
 
 makeRequest : Cmd Msg
