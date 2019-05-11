@@ -6,6 +6,7 @@ import Api.Object.Timer
 import Api.Query as Query
 import Element exposing (Element)
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import RemainingSeconds
 import Time
 
 
@@ -26,12 +27,18 @@ view : Time.Posix -> Maybe Timer -> Element msg
 view now maybeTimer =
     case maybeTimer of
         Just timer ->
-            case secondsRemaining now timer of
+            case
+                RemainingSeconds.between
+                    { now = now
+                    , timerCreated = timer.createdAt
+                    , timerDurationMinutes = 25
+                    }
+            of
                 Just remaining ->
                     Element.column []
                         [ Element.text (Api.Enum.TimerKind.toString timer.kind)
                         , Element.text "Timer is running"
-                        , Element.text (remaining |> secondsRemainingView)
+                        , Element.text (remaining |> RemainingSeconds.toString)
                         ]
 
                 Nothing ->
@@ -39,43 +46,3 @@ view now maybeTimer =
 
         Nothing ->
             Element.text "No active timer"
-
-
-secondsRemaining : Time.Posix -> Timer -> Maybe RemainingSeconds
-secondsRemaining now timer =
-    let
-        timerMillis =
-            25 * 60 * 1000
-    in
-    (((Time.posixToMillis timer.createdAt + timerMillis)
-        - Time.posixToMillis now
-     )
-        // 1000
-    )
-        |> remainingSeconds
-
-
-remainingSeconds : Int -> Maybe RemainingSeconds
-remainingSeconds seconds =
-    if seconds > 0 then
-        seconds |> RemainingSeconds |> Just
-
-    else
-        Nothing
-
-
-type RemainingSeconds
-    = RemainingSeconds Int
-
-
-secondsRemainingView : RemainingSeconds -> String
-secondsRemainingView (RemainingSeconds seconds) =
-    [ seconds
-        // 60
-        |> String.fromInt
-    , seconds
-        |> modBy 60
-        |> String.fromInt
-        |> String.padLeft 2 '0'
-    ]
-        |> String.join ":"
