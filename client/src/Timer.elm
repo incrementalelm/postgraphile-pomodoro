@@ -26,17 +26,22 @@ view : Time.Posix -> Maybe Timer -> Element msg
 view now maybeTimer =
     case maybeTimer of
         Just timer ->
-            Element.column []
-                [ Element.text (Api.Enum.TimerKind.toString timer.kind)
-                , Element.text "Timer is running"
-                , Element.text (secondsRemaining now timer |> secondsRemainingView)
-                ]
+            case secondsRemaining now timer of
+                Just remaining ->
+                    Element.column []
+                        [ Element.text (Api.Enum.TimerKind.toString timer.kind)
+                        , Element.text "Timer is running"
+                        , Element.text (remaining |> secondsRemainingView)
+                        ]
+
+                Nothing ->
+                    Element.text "No active timer"
 
         Nothing ->
             Element.text "No active timer"
 
 
-secondsRemaining : Time.Posix -> Timer -> RemainingSeconds
+secondsRemaining : Time.Posix -> Timer -> Maybe RemainingSeconds
 secondsRemaining now timer =
     let
         timerMillis =
@@ -47,7 +52,16 @@ secondsRemaining now timer =
      )
         // 1000
     )
-        |> RemainingSeconds
+        |> remainingSeconds
+
+
+remainingSeconds : Int -> Maybe RemainingSeconds
+remainingSeconds seconds =
+    if seconds > 0 then
+        seconds |> RemainingSeconds |> Just
+
+    else
+        Nothing
 
 
 type RemainingSeconds
