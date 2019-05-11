@@ -13,25 +13,25 @@ export class GraphqlSubscriptions {
     this.webSocket.onmessage = event => {
       const data = JSON.parse(event.data);
       switch (data.type) {
-        case GQL.CONNECTION_ACK: {
+        case GQL_MESSAGE_TYPE.CONNECTION_ACK: {
           console.log("ack");
           this.resolveConnected();
 
           break;
         }
-        case GQL.CONNECTION_ERROR: {
+        case GQL_MESSAGE_TYPE.CONNECTION_ERROR: {
           console.error(data.payload);
           break;
         }
-        case GQL.CONNECTION_KEEP_ALIVE: {
+        case GQL_MESSAGE_TYPE.CONNECTION_KEEP_ALIVE: {
           break;
         }
-        case GQL.DATA: {
+        case GQL_MESSAGE_TYPE.DATA: {
           console.log(data.id, data.payload.errors, data.payload.data);
           sendSubscriptionPayload(data.payload);
           break;
         }
-        case GQL.COMPLETE: {
+        case GQL_MESSAGE_TYPE.COMPLETE: {
           console.log("completed", data.id);
           break;
         }
@@ -41,7 +41,7 @@ export class GraphqlSubscriptions {
     this.webSocket.onopen = event => {
       this.webSocket.send(
         JSON.stringify({
-          type: GQL.CONNECTION_INIT,
+          type: GQL_MESSAGE_TYPE.CONNECTION_INIT,
           payload: {}
         })
       );
@@ -52,7 +52,7 @@ export class GraphqlSubscriptions {
     this.onConnected.then(() => {
       this.webSocket.send(
         JSON.stringify({
-          type: GQL.START,
+          type: GQL_MESSAGE_TYPE.START,
           id: "2",
           payload: { query: subscriptionQuery, variables: null }
         })
@@ -60,7 +60,7 @@ export class GraphqlSubscriptions {
     });
   }
 }
-const GQL = {
+const GQL_MESSAGE_TYPE = {
   CONNECTION_INIT: "connection_init",
   CONNECTION_ACK: "connection_ack",
   CONNECTION_ERROR: "connection_error",
