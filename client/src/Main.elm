@@ -30,13 +30,18 @@ selection =
         Timer.selection
 
 
-startTimer : SelectionSet (Maybe Timer) RootMutation
-startTimer =
+startTimerSelection : SelectionSet (Maybe Timer) RootMutation
+startTimerSelection =
     Api.Mutation.startTimer
         { input = { kind = Api.Enum.TimerKind.Work, clientMutationId = Absent }
         }
         (Api.Object.StartTimerPayload.timer Timer.selection)
         |> SelectionSet.map (Maybe.withDefault Nothing)
+
+
+startTimer : Cmd Msg
+startTimer =
+    Request.mutation GotTimerResponse startTimerSelection
 
 
 makeRequest : Cmd Msg
@@ -47,6 +52,7 @@ makeRequest =
 type Msg
     = GotTimerResponse (Response (Maybe Timer))
     | GotCurrentTime Time.Posix
+    | ClickedStartTimer
 
 
 type alias Model =
@@ -77,6 +83,9 @@ update msg model =
         GotCurrentTime now ->
             ( { model | now = now }, Cmd.none )
 
+        ClickedStartTimer ->
+            ( model, startTimer )
+
 
 main : Program Flags Model Msg
 main =
@@ -97,7 +106,12 @@ view model =
                 Element.text "Loading..."
 
             RemoteData.Success response ->
-                Timer.view model.now response
+                Element.column
+                    [ Element.centerX
+                    ]
+                    [ Timer.view model.now response
+                    , startTimerButton
+                    ]
 
             RemoteData.NotAsked ->
                 Element.text "..."
@@ -105,6 +119,20 @@ view model =
             RemoteData.Failure error ->
                 Element.paragraph [] [ Element.text (Debug.toString error) ]
         )
-            |> Element.layout []
+            |> Element.layout
+                [ Element.padding 20
+                , Element.width Element.fill
+                ]
             |> List.singleton
     }
+
+
+startTimerButton : Element Msg
+startTimerButton =
+    Element.el
+        [ Element.Events.onClick ClickedStartTimer
+        , Element.pointer
+        , Element.Border.width 2
+        , Element.padding 8
+        ]
+        (Element.text "Start Timer")

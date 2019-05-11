@@ -11,13 +11,18 @@ type alias Response data =
     RemoteData (Graphql.Http.RawError () Http.Error) data
 
 
+endpoint : String
+endpoint =
+    "http://localhost:8000/graphql"
+
+
 query :
     (Response decodesTo -> msg)
     -> SelectionSet decodesTo RootQuery
     -> Cmd msg
 query msgConstructor querySelection =
     querySelection
-        |> Graphql.Http.queryRequest "http://localhost:8000/graphql"
+        |> Graphql.Http.queryRequest endpoint
         |> Graphql.Http.send
             (\result ->
                 result
@@ -34,7 +39,7 @@ mutation :
     -> Cmd msg
 mutation msgConstructor querySelection =
     querySelection
-        |> Graphql.Http.mutationRequest "http://localhost:4000/"
+        |> Graphql.Http.mutationRequest endpoint
         |> Graphql.Http.send
             (\result ->
                 result
