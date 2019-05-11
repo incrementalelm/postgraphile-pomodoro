@@ -2,8 +2,6 @@ import { Elm } from "./src/Main.elm";
 
 const app = Elm.Main.init();
 
-console.log(app);
-
 let pendingSubscriptions = [];
 
 app.ports.startSubscription.subscribe(subscriptionQuery => {
@@ -77,73 +75,3 @@ webSocket.onopen = event => {
     })
   );
 };
-const query = `subscription {
-  listen(topic: "timer") {
-    query {
-      activeTimer {
-        kind
-        id
-        createdAt
-      }
-    }
-  }
-}
-`;
-
-/*
-
-
-
-
-webSocket.send(
-  JSON.stringify({
-    type: GQL.START,
-    id,
-    payload: { query, variables: null }
-  })
-);
-*/
-
-// webSocket.send(
-//   JSON.stringify({
-//     type: GQL.START,
-//     id,
-//     payload: { query, variables: null }
-//   })
-// );
-
-// webSocket.send(JSON.stringify({
-//   type: GQL.START,
-//   id,
-//   payload: { query, variables, operationName }
-// }))
-// webSocket.onMessage = event => {
-//   const data = JSON.parse(event.data)
-//   switch (data.type) {
-//     case GQL.CONNECTION_ACK: {
-//       console.log('success')
-//       break
-//     }
-//     case GQL.CONNECTION_ERROR: {
-//       console.error(data.payload)
-//       break
-//     }
-//     case GQL.CONNECTION_KEEP_ALIVE: {
-//       break
-//     }
-//     case GQL.DATA: {
-//       console.log(data.id, data.payload.errors, data.payload.data)
-//       break
-//     }
-//     case GQL.COMPLETE: {
-//       console.log('completed', data.id)
-//       break
-//     }
-//   }
-// }
-//
-// webSocket.send(JSON.stringify({
-//   type: GQL.START,
-//   id,
-//   payload: { query, variables: null }
-// }))
