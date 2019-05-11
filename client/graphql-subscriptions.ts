@@ -1,7 +1,8 @@
 export class GraphqlSubscriptions {
-  webSocket: WebSocket;
-  onConnected: Promise<void>;
-  resolveConnected: (value?: void | PromiseLike<void>) => void;
+  private webSocket: WebSocket;
+  private onConnected: Promise<void>;
+  private resolveConnected: (value?: void | PromiseLike<void>) => void;
+
   constructor(websocketUrl: string) {
     this.onConnected = new Promise((resolve, reject) => {
       this.resolveConnected = resolve;

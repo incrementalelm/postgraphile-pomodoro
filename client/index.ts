@@ -1,4 +1,3 @@
-// import { Elm } from "./src/Main.elm";
 const { Elm } = require("./src/Main.elm");
 import { GraphqlSubscriptions } from "./graphql-subscriptions";
 
