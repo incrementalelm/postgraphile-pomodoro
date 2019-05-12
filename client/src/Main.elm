@@ -32,12 +32,12 @@ import Url exposing (Url)
 registerGraphqlSubscription : { cmd : Cmd Msg, sub : Sub Msg }
 registerGraphqlSubscription =
     GraphqlSubscription.cmdAndSub
-        subscriptionString
+        subscriptionQuery
         GotTimerSubscriptionResponse
 
 
-subscriptionString : SelectionSet (Maybe Timer) Graphql.Operation.RootSubscription
-subscriptionString =
+subscriptionQuery : SelectionSet (Maybe Timer) Graphql.Operation.RootSubscription
+subscriptionQuery =
     Api.Subscription.listen { topic = "timer" } (Api.Object.ListenPayload.query selection)
         |> SelectionSet.map (Maybe.withDefault Nothing)
 

@@ -13,6 +13,8 @@
     "@dillonkearns/elm-graphql": "^3.2.0",
     "@types/node": "^12.0.0",
     "elm-format": "^0.8.1",
+    "elm-hot": "^1.0.1",
+    "node-elm-compiler": "^5.0.3",
     "prettier": "^1.15.2",
     "typescript": "^3.4.5"
   }
