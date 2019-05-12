@@ -34,6 +34,36 @@ port startSubscription : String -> Cmd msg
 port subscriptionPayloadReceived : (Json.Decode.Value -> msg) -> Sub msg
 
 
+registerSubscription : ( Cmd Msg, Sub Msg )
+registerSubscription =
+    registerSubscriptionHelper
+        subscriptionString
+        startSubscription
+        (\result ->
+            result
+                |> Result.map (Maybe.withDefault Nothing)
+                |> GotTimerSubscriptionResponse
+        )
+        subscriptionPayloadReceived
+
+
+registerSubscriptionHelper :
+    SelectionSet decodesTo Graphql.Operation.RootSubscription
+    -> (String -> Cmd msg)
+    -> (Result Json.Decode.Error decodesTo -> msg)
+    -> ((Json.Decode.Value -> msg) -> Sub msg)
+    -> ( Cmd msg, Sub msg )
+registerSubscriptionHelper subscription startSubscriptionPort gotSubscriptionPayloadMsg subscriptionPayloadPort =
+    ( subscriptionString |> Graphql.Document.serializeSubscription |> startSubscriptionPort
+    , subscriptionPayloadPort
+        (\payload ->
+            payload
+                |> Json.Decode.decodeValue (Graphql.Document.decoder subscription)
+                |> gotSubscriptionPayloadMsg
+        )
+    )
+
+
 subscriptionString : SelectionSet (Maybe (Maybe Timer)) Graphql.Operation.RootSubscription
 subscriptionString =
     Api.Subscription.listen { topic = "timer" } (Api.Object.ListenPayload.query selection)
