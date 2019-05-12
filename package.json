@@ -3,24 +3,17 @@
   "version": "0.0.0",
   "scripts": {
     "start": "cd server && ts-node-dev --ignore-watch modeling-errors-typegen.ts --no-notify --transpileOnly --respawn .",
-    "start-elm-old": "cd client && elm-live src/Main.elm --pushstate --proxyPrefix /graphql --open --proxyHost http://localhost:5000/",
     "start-elm": "cd client && parcel index.html",
     "regen-graphql": "cd client && elm-graphql http://localhost:5000/graphql --output gen --scalar-codecs Scalar"
   },
   "dependencies": {
-    "apollo-server": "^2.2.0",
-    "graphql": "^14.0.2",
-    "nexus": "0.11.2",
-    "parcel-bundler": "^1.12.3",
-    "ts-node-dev": "^1.0.0-pre.30"
+    "parcel-bundler": "^1.12.3"
   },
   "devDependencies": {
     "@dillonkearns/elm-graphql": "^3.2.0",
+    "@types/node": "^12.0.0",
     "elm-format": "^0.8.1",
-    "elm-hot": "^1.0.1",
-    "elm-live": "^3.4.0",
-    "node-elm-compiler": "^5.0.3",
     "prettier": "^1.15.2",
-    "typescript": "^3.1.6"
+    "typescript": "^3.4.5"
   }
 }
