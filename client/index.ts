@@ -3,9 +3,6 @@ import { GraphqlSubscriptions } from "./graphql-subscriptions";
 
 const app = Elm.Main.init();
 
-let pendingSubscriptions = [];
-
-const webSocket = new WebSocket("ws://localhost:5000/graphql", "graphql-ws");
 let graphqlSubscriptions = new GraphqlSubscriptions(
   "ws://localhost:5000/graphql"
 );
