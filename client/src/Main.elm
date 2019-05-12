@@ -118,7 +118,7 @@ init _ =
       }
     , Cmd.batch
         [ makeRequest
-        , startSubscription (subscriptionString |> Graphql.Document.serializeSubscription)
+        , registerSubscription |> Tuple.first
         ]
     )
 
@@ -154,13 +154,7 @@ main =
             \model ->
                 Sub.batch
                     [ Time.every 10 GotCurrentTime
-                    , subscriptionPayloadReceived
-                        (\payload ->
-                            payload
-                                |> Json.Decode.decodeValue (Graphql.Document.decoder subscriptionString)
-                                |> Result.map (Maybe.withDefault Nothing)
-                                |> GotTimerSubscriptionResponse
-                        )
+                    , registerSubscription |> Tuple.second
                     ]
         }
 
