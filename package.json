@@ -2,7 +2,7 @@
   "name": "modeling-errors-in-graphql-for-elm-apps",
   "version": "0.0.0",
   "scripts": {
-    "start": "cd server && ts-node-dev --ignore-watch modeling-errors-typegen.ts --no-notify --transpileOnly --respawn .",
+    "start": "cd server && npm start",
     "start-elm": "cd client && parcel index.html",
     "regen-graphql": "cd client && elm-graphql http://localhost:5000/graphql --output gen --scalar-codecs Scalar"
   },
