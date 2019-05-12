@@ -20,8 +20,8 @@ import Graphql.Document
 import Graphql.Operation exposing (RootMutation, RootQuery)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
+import GraphqlSubscription
 import Json.Decode
-import RegisterGraphqlSubscription
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
 import Time
@@ -31,7 +31,7 @@ import Url exposing (Url)
 
 registerSubscription : ( Cmd Msg, Sub Msg )
 registerSubscription =
-    RegisterGraphqlSubscription.register
+    GraphqlSubscription.register
         subscriptionString
         (\result ->
             result

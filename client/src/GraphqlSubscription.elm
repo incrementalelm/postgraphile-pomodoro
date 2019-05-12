@@ -1,7 +1,7 @@
-port module RegisterGraphqlSubscription exposing (register)
+port module GraphqlSubscription exposing (register)
 
 import Graphql.Document
-import Graphql.Operation exposing (RootMutation, RootQuery)
+import Graphql.Operation
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Json.Decode
 
