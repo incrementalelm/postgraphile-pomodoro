@@ -31,32 +31,13 @@ import Url exposing (Url)
 
 registerSubscription : ( Cmd Msg, Sub Msg )
 registerSubscription =
-    registerSubscriptionHelper
+    RegisterGraphqlSubscription.register
         subscriptionString
-        RegisterGraphqlSubscription.startSubscription
         (\result ->
             result
                 |> Result.map (Maybe.withDefault Nothing)
                 |> GotTimerSubscriptionResponse
         )
-        RegisterGraphqlSubscription.subscriptionPayloadReceived
-
-
-registerSubscriptionHelper :
-    SelectionSet decodesTo Graphql.Operation.RootSubscription
-    -> (String -> Cmd msg)
-    -> (Result Json.Decode.Error decodesTo -> msg)
-    -> ((Json.Decode.Value -> msg) -> Sub msg)
-    -> ( Cmd msg, Sub msg )
-registerSubscriptionHelper subscription startSubscriptionPort gotSubscriptionPayloadMsg subscriptionPayloadPort =
-    ( subscriptionString |> Graphql.Document.serializeSubscription |> startSubscriptionPort
-    , subscriptionPayloadPort
-        (\payload ->
-            payload
-                |> Json.Decode.decodeValue (Graphql.Document.decoder subscription)
-                |> gotSubscriptionPayloadMsg
-        )
-    )
 
 
 subscriptionString : SelectionSet (Maybe (Maybe Timer)) Graphql.Operation.RootSubscription
