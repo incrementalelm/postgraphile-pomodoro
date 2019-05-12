@@ -33,7 +33,7 @@ registerGraphqlSubscription : { cmd : Cmd Msg, sub : Sub Msg }
 registerGraphqlSubscription =
     GraphqlSubscription.cmdAndSub
         subscriptionString
-        (\result -> result |> GotTimerSubscriptionResponse)
+        GotTimerSubscriptionResponse
 
 
 subscriptionString : SelectionSet (Maybe Timer) Graphql.Operation.RootSubscription
