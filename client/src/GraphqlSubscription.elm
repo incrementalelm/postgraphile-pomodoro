@@ -11,7 +11,7 @@ cmdAndSub :
     -> (Result Json.Decode.Error decodesTo -> msg)
     -> { cmd : Cmd msg, sub : Sub msg }
 cmdAndSub =
-    registerSubscriptionHelper startSubscription subscriptionPayloadReceived
+    registerSubscriptionHelper initializeSubscription subscriptionPayloadReceived
 
 
 registerSubscriptionHelper :
@@ -20,8 +20,8 @@ registerSubscriptionHelper :
     -> SelectionSet decodesTo Graphql.Operation.RootSubscription
     -> (Result Json.Decode.Error decodesTo -> msg)
     -> { cmd : Cmd msg, sub : Sub msg }
-registerSubscriptionHelper startSubscriptionPort subscriptionPayloadPort subscription gotSubscriptionPayloadMsg =
-    { cmd = subscription |> Graphql.Document.serializeSubscription |> startSubscriptionPort
+registerSubscriptionHelper initializeSubscriptionPort subscriptionPayloadPort subscription gotSubscriptionPayloadMsg =
+    { cmd = subscription |> Graphql.Document.serializeSubscription |> initializeSubscriptionPort
     , sub =
         subscriptionPayloadPort
             (\payload ->
@@ -32,7 +32,7 @@ registerSubscriptionHelper startSubscriptionPort subscriptionPayloadPort subscri
     }
 
 
-port startSubscription : String -> Cmd msg
+port initializeSubscription : String -> Cmd msg
 
 
 port subscriptionPayloadReceived : (Json.Decode.Value -> msg) -> Sub msg
