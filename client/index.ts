@@ -5,6 +5,6 @@ const app = Elm.Main.init();
 
 let graphqlSubscriptions = new GraphqlSubscriptions(
   "ws://localhost:5000/graphql",
-  app.ports.subscriptionPayloadReceived.send,
-  app.ports.initializeSubscription.subscribe
+  app.ports.initializeSubscription.subscribe,
+  app.ports.subscriptionPayloadReceived.send
 );

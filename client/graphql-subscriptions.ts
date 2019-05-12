@@ -5,10 +5,10 @@ export class GraphqlSubscriptions {
 
   constructor(
     websocketUrl: string,
-    sendPayloadToElm: (payload: any) => void,
     listenForSubscriptionFromElm: (
       callback: (subscriptionQuery: string) => void
-    ) => void
+    ) => void,
+    sendPayloadToElm: (payload: any) => void
   ) {
     this.onConnected = new Promise((resolve, reject) => {
       this.resolveConnected = resolve;
