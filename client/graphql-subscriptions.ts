@@ -3,12 +3,21 @@ export class GraphqlSubscriptions {
   private onConnected: Promise<void>;
   private resolveConnected: (value?: void | PromiseLike<void>) => void;
 
-  constructor(websocketUrl: string, elmApp) {
+  constructor(
+    websocketUrl: string,
+    sendPayloadToElm: (payload: any) => void,
+    listenForSubscriptionFromElm: (
+      callback: (subscriptionQuery: string) => void
+    ) => void
+  ) {
     this.onConnected = new Promise((resolve, reject) => {
       this.resolveConnected = resolve;
     });
     this.webSocket = new WebSocket(websocketUrl, "graphql-ws");
-    this.addListeners(elmApp.ports.subscriptionPayloadReceived.send);
+    this.addListeners(sendPayloadToElm);
+    listenForSubscriptionFromElm((subscriptionQuery: string) => {
+      this.addSubscription(subscriptionQuery);
+    });
   }
 
   private async addListeners(sendSubscriptionPayload: (payload: any) => void) {
