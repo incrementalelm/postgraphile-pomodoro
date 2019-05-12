@@ -29,9 +29,9 @@ import Timer exposing (Timer)
 import Url exposing (Url)
 
 
-registerSubscription : ( Cmd Msg, Sub Msg )
-registerSubscription =
-    GraphqlSubscription.register
+registerGraphqlSubscription : { cmd : Cmd Msg, sub : Sub Msg }
+registerGraphqlSubscription =
+    GraphqlSubscription.cmdAndSub
         subscriptionString
         (\result ->
             result
@@ -92,10 +92,7 @@ init _ =
     ( { activeTimerResponse = RemoteData.Loading
       , now = Time.millisToPosix 0
       }
-    , Cmd.batch
-        [ makeRequest
-        , registerSubscription |> Tuple.first
-        ]
+    , Cmd.batch [ makeRequest, registerGraphqlSubscription.cmd ]
     )
 
 
@@ -126,13 +123,15 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions =
-            \model ->
-                Sub.batch
-                    [ Time.every 10 GotCurrentTime
-                    , registerSubscription |> Tuple.second
-                    ]
+        , subscriptions = subscriptions
         }
+
+
+subscriptions model =
+    Sub.batch
+        [ Time.every 10 GotCurrentTime
+        , registerGraphqlSubscription.sub
+        ]
 
 
 view : Model -> Browser.Document Msg
