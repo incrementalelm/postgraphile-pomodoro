@@ -33,16 +33,13 @@ registerGraphqlSubscription : { cmd : Cmd Msg, sub : Sub Msg }
 registerGraphqlSubscription =
     GraphqlSubscription.cmdAndSub
         subscriptionString
-        (\result ->
-            result
-                |> Result.map (Maybe.withDefault Nothing)
-                |> GotTimerSubscriptionResponse
-        )
+        (\result -> result |> GotTimerSubscriptionResponse)
 
 
-subscriptionString : SelectionSet (Maybe (Maybe Timer)) Graphql.Operation.RootSubscription
+subscriptionString : SelectionSet (Maybe Timer) Graphql.Operation.RootSubscription
 subscriptionString =
     Api.Subscription.listen { topic = "timer" } (Api.Object.ListenPayload.query selection)
+        |> SelectionSet.map (Maybe.withDefault Nothing)
 
 
 selection : SelectionSet (Maybe Timer) RootQuery
