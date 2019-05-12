@@ -21,6 +21,7 @@ import Graphql.Operation exposing (RootMutation, RootQuery)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Json.Decode
+import RegisterGraphqlSubscription
 import RemoteData exposing (RemoteData)
 import Request exposing (Response)
 import Time
@@ -28,23 +29,17 @@ import Timer exposing (Timer)
 import Url exposing (Url)
 
 
-port startSubscription : String -> Cmd msg
-
-
-port subscriptionPayloadReceived : (Json.Decode.Value -> msg) -> Sub msg
-
-
 registerSubscription : ( Cmd Msg, Sub Msg )
 registerSubscription =
     registerSubscriptionHelper
         subscriptionString
-        startSubscription
+        RegisterGraphqlSubscription.startSubscription
         (\result ->
             result
                 |> Result.map (Maybe.withDefault Nothing)
                 |> GotTimerSubscriptionResponse
         )
-        subscriptionPayloadReceived
+        RegisterGraphqlSubscription.subscriptionPayloadReceived
 
 
 registerSubscriptionHelper :
