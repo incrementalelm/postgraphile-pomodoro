@@ -17,6 +17,7 @@ import Element.Events
 import Element.Input
 import Element.Keyed
 import Graphql.Document
+import Graphql.Http.GraphqlError as GraphqlError
 import Graphql.Operation exposing (RootMutation, RootQuery)
 import Graphql.OptionalArgument exposing (OptionalArgument(..))
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
@@ -69,7 +70,7 @@ makeRequest =
 
 type Msg
     = GotTimerResponse (Response (Maybe Timer))
-    | GotTimerSubscriptionResponse (Result Json.Decode.Error (Maybe Timer))
+    | GotTimerSubscriptionResponse (Result (GraphqlSubscription.SubscriptionError (Maybe Timer)) (Maybe Timer))
     | GotCurrentTime Time.Posix
     | ClickedStartTimer
 
@@ -111,7 +112,7 @@ update msg model =
                     ( { model | activeTimerResponse = RemoteData.succeed timer }, Cmd.none )
 
                 Err error ->
-                    Debug.todo (Json.Decode.errorToString error)
+                    ( model, Cmd.none )
 
 
 main : Program Flags Model Msg
