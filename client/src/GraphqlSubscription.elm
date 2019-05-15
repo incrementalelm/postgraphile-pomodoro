@@ -13,7 +13,7 @@ cmdAndSub :
     -> (Result (SubscriptionError decodesTo) decodesTo -> msg)
     -> { cmd : Cmd msg, sub : Sub msg }
 cmdAndSub =
-    registerSubscriptionHelper initializeSubscription subscriptionPayloadReceived
+    registerSubscriptionHelper elmToJs jsToElm
 
 
 registerSubscriptionHelper :
@@ -22,11 +22,11 @@ registerSubscriptionHelper :
     -> SelectionSet decodesTo Graphql.Operation.RootSubscription
     -> (Result (SubscriptionError decodesTo) decodesTo -> msg)
     -> { cmd : Cmd msg, sub : Sub msg }
-registerSubscriptionHelper initializeSubscriptionPort subscriptionPayloadPort subscriptionQuery gotSubscriptionPayloadMsg =
+registerSubscriptionHelper elmToJsPort subscriptionPayloadPort subscriptionQuery gotSubscriptionPayloadMsg =
     { cmd =
         subscriptionQuery
             |> Graphql.Document.serializeSubscription
-            |> initializeSubscriptionPort
+            |> elmToJsPort
     , sub =
         subscriptionPayloadPort
             (\payload ->
@@ -88,7 +88,7 @@ decodeErrorWithData data =
     GraphqlError.decoder |> Json.Decode.map (Tuple.pair data) |> Json.Decode.map Err
 
 
-port initializeSubscription : String -> Cmd msg
+port elmToJs : String -> Cmd msg
 
 
-port subscriptionPayloadReceived : (Json.Decode.Value -> msg) -> Sub msg
+port jsToElm : (Json.Decode.Value -> msg) -> Sub msg
