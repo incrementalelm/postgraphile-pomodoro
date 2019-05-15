@@ -6,6 +6,7 @@ import Graphql.Http.GraphqlError as GraphqlError
 import Graphql.Operation
 import Graphql.SelectionSet as SelectionSet exposing (SelectionSet)
 import Json.Decode
+import Json.Encode
 
 
 cmdAndSub :
@@ -17,7 +18,7 @@ cmdAndSub =
 
 
 registerSubscriptionHelper :
-    (String -> Cmd msg)
+    (Json.Encode.Value -> Cmd msg)
     -> ((Json.Decode.Value -> msg) -> Sub msg)
     -> SelectionSet decodesTo Graphql.Operation.RootSubscription
     -> (Result (SubscriptionError decodesTo) decodesTo -> msg)
@@ -25,7 +26,7 @@ registerSubscriptionHelper :
 registerSubscriptionHelper elmToJsPort subscriptionPayloadPort subscriptionQuery gotSubscriptionPayloadMsg =
     { cmd =
         subscriptionQuery
-            |> Graphql.Document.serializeSubscription
+            |> startSubscriptionMsg
             |> elmToJsPort
     , sub =
         subscriptionPayloadPort
@@ -35,6 +36,20 @@ registerSubscriptionHelper elmToJsPort subscriptionPayloadPort subscriptionQuery
                     |> gotSubscriptionPayloadMsg
             )
     }
+
+
+startSubscriptionMsg :
+    SelectionSet decodesTo Graphql.Operation.RootSubscription
+    -> Json.Encode.Value
+startSubscriptionMsg subscriptionQuery =
+    Json.Encode.object
+        [ ( "event", Json.Encode.string "startSubscription" )
+        , ( "subscriptionQuery"
+          , subscriptionQuery
+                |> Graphql.Document.serializeSubscription
+                |> Json.Encode.string
+          )
+        ]
 
 
 payloadToResponse :
@@ -88,7 +103,7 @@ decodeErrorWithData data =
     GraphqlError.decoder |> Json.Decode.map (Tuple.pair data) |> Json.Decode.map Err
 
 
-port elmToJs : String -> Cmd msg
+port elmToJs : Json.Encode.Value -> Cmd msg
 
 
 port jsToElm : (Json.Decode.Value -> msg) -> Sub msg

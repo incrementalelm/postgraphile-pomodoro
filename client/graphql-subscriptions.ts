@@ -1,3 +1,9 @@
+// type Event = "start-subscription";
+type Msg = {
+  event: "startSubscription";
+  subscriptionQuery: string;
+};
+
 export class GraphqlSubscriptions {
   private webSocket: WebSocket;
   private onConnected: Promise<void>;
@@ -5,9 +11,7 @@ export class GraphqlSubscriptions {
 
   constructor(
     websocketUrl: string,
-    listenForSubscriptionFromElm: (
-      callback: (subscriptionQuery: string) => void
-    ) => void,
+    listenForSubscriptionFromElm: (callback: (msg: Msg) => void) => void,
     sendPayloadToElm: (payload: any) => void
   ) {
     this.onConnected = new Promise((resolve, reject) => {
@@ -15,8 +19,10 @@ export class GraphqlSubscriptions {
     });
     this.webSocket = new WebSocket(websocketUrl, "graphql-ws");
     this.addListeners(sendPayloadToElm);
-    listenForSubscriptionFromElm((subscriptionQuery: string) => {
-      this.addSubscription(subscriptionQuery);
+    listenForSubscriptionFromElm(msg => {
+      if (msg.event === "startSubscription") {
+        this.addSubscription(msg.subscriptionQuery);
+      }
     });
   }
 
